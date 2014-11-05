@@ -4,6 +4,7 @@
 ```{r Load libraries and define directories}
 rm(list=ls())
 
+library(dplyr)
 library(plyr)
 library(zoo)
 library(devtools)
@@ -32,36 +33,14 @@ graphsDir  <- paste0(baseDir, '/graphs/' )
 # Select the agencies to use data from.
 ```{r Choose data source}
 
-# Select "T" or "F" for using agency data
-sources <- list (
-  # Northeast
-  CTDEP  = CTDEP  <- T,
-  MADEP  = MADEP  <- T,
-  MAFW   = MAFW   <- T,
-  MAUSGS = MAUSGS <- T,
-  MEDMR  = MEDMR  <- T,
-  MEFWS  = MEFWS  <- T,
-  NHDES  = NHDES  <- T,
-  NHFG   = NHFG   <- T,
-  USFS   = USFS   <- T,
-  VTFWS  = VTFWS  <- T,
-  
-  # Montana
-  MTUSGSYellowstone = MTUSGSYellowstone <- F,
-  MTUSGSGlacier     = MTUSGSGlacier     <- F
-)
+e <- read.table("dataLocal/CCE_DAILY_110414.csv", sep = ",", header = T)
+str(e)
+#e$date <- as.Date(as.character(e$date), format = "%m/%d/%Y")
+e$date <- as.character(e$date)
 
-dataSources <- names(sources[(sources == T)])
-
-# Enter the common fields from the temperature ("site" must be one).
-tempFields <- c('site', 'year', 'dOY', 'date', 'agency', 'temp', 'airTemp')
-
-# Enter the specific covariate fields you want to pull ("site" must be one) or for the entire file, enter "ALL"
-covFields <- c('site', 'HUC4', 'HUC8', 'HUC12')
-
-# Read in data records and join into one dataframe
-# ------------------------------------------------
-e <- readStreamTempData(timeSeries = T, covariates = T, dataSourceList = dataSources, fieldListTS = tempFields, fieldListCD = covFields, directory = dataInDir )
+# rename variables to match existing code
+e <- e %>%
+  mutate(temp = stream_mn, airTemp = TmeanD, site = SiteID, HUC8 = as.character(HUC), dOY = strptime(e$date, "%m/%d/%Y")$yday+1) # I just call it HUC8 to match northeast code for now
 
 ```
 
@@ -108,7 +87,7 @@ for (i in 1:nrow(siteYearCombos)){
   #library(zoo)
   
   # Status
-  print(c(i,as.character(siteYearCombos$site[i]),siteYearCombos$year[i],i/nrow(siteYearCombos)))
+ # print(c(i,as.character(siteYearCombos$site[i]),siteYearCombos$year[i],i/nrow(siteYearCombos)))
   
   # Index current site/year
   currSite <- which(e$site == as.character(siteYearCombos$site[i]) & e$year == siteYearCombos$year[i] )
@@ -137,14 +116,14 @@ hiCI <- 0.999
 for ( i in 1:nrow(siteYearCombos)){
   
   # Print status
-  print(i)
+ # print(i)
   
   # Index sites, years, and HUCs
   tempBreaks <- data.frame( year  = as.numeric  (siteYearCombos$year[i]),
                             site  = as.character(siteYearCombos$site[i]),
-                            HUC12 = as.character(unique(e$HUC12[which(e$site == siteYearCombos$site[i])])),
+                           # HUC12 = as.character(unique(e$HUC8[which(e$site == siteYearCombos$site[i])])), # Made this HUC8 just to work
                             HUC8  = as.character(unique(e$HUC8 [which(e$site == siteYearCombos$site[i])])),
-                            HUC4  = as.character(unique(e$HUC4 [which(e$site == siteYearCombos$site[i])])),
+                            #HUC4  = as.character(unique(e$HUC8 [which(e$site == siteYearCombos$site[i])])), #Temporary hack made = to HUC8 just to run
                             quantileLo = NA,
                             quantileHi = NA)
   
@@ -240,7 +219,7 @@ for (j in 1:nSites){
 	for (year in completeYearsSpringOrFall){ 
 
     # Print status
-    print(c('BP 1 and 3',j,as.character(siteList[j]),year))
+    #print(c('BP 1 and 3',j,as.character(siteList[j]),year))
     
     # New column for selecting years with at least one complete season
 	  breaks$springOrFallBPComplete[ breaks$year == year & breaks$site == siteList[j] ] <- TRUE
@@ -271,7 +250,7 @@ for (j in 1:nSites){
           #     if the iteration falls out of the approximated range examined. If the moving
           #     mean is outside of the range, it gets assigned a zero.
           if( (i+ii-2) %in% eYear$dOY ) {
-			  	  runsSpring[ i,ii ] <- 1*((eYear$movingMean[ eYear$dOY == (i+ii-2) ] >= lo) & (eYear$movingMean[ eYear$dOY == (i+ii-2) ] <= hi))
+			  	  runsSpring[ i,ii ] <- 1*all((eYear$movingMean[ eYear$dOY == (i+ii-2) ] >= lo) & (eYear$movingMean[ eYear$dOY == (i+ii-2) ] <= hi))
           } else (runsSpring[ i,ii ] <- 1  )
             
 				}# end numForward loop
@@ -313,7 +292,7 @@ for (j in 1:nSites){
           #     if the iteration falls out of the approximated range examined. If the moving
           #     mean is outside of the range, it gets assigned a zero.
 				  if( (i-ii+2) %in% eYear$dOY ) { 
-					  runsFall[ i,ii ] <- 1*((eYear$movingMean[ eYear$dOY == (i-ii+2) ] >= lo) & (eYear$movingMean[ eYear$dOY == (i-ii+2) ] <= hi))
+					  runsFall[ i,ii ] <- 1*all((eYear$movingMean[ eYear$dOY == (i-ii+2) ] >= lo) & (eYear$movingMean[ eYear$dOY == (i-ii+2) ] <= hi))
 				  } else(runsFall[ i,ii ] <- 1 )
           
 				}# end numForward loop
@@ -348,6 +327,7 @@ meanBPSite  <- ddply( breaks, .(site) , summarise, meanSpringBPSite  = mean(spri
 meanBPHUC12 <- ddply( breaks, .(HUC12), summarise, meanSpringBPHUC12 = mean(springBP,na.rm=T), meanFallBPHUC12 = mean(fallBP,na.rm=T) )
 meanBPHUC8  <- ddply( breaks, .(HUC8) , summarise, meanSpringBPHUC8  = mean(springBP,na.rm=T), meanFallBPHUC8  = mean(fallBP,na.rm=T) )
 meanBPHUC4  <- ddply( breaks, .(HUC4) , summarise, meanSpringBPHUC4  = mean(springBP,na.rm=T), meanFallBPHUC4  = mean(fallBP,na.rm=T) )
+meanBP  <- ddply( breaks, .(), summarise, meanSpringBP  = mean(springBP, na.rm=T), meanFallBP  = mean(fallBP ,na.rm=T) )
 
 # Merge in mean BPs to "breaks"
 breaks <- merge( x = breaks, y = meanBPSite , by = 'site' , all.x = T, all.y = F, sort = F)
@@ -399,7 +379,7 @@ breaks$sourceSpringBP[ huc12BP ] <- 'HUC12 mean'
 huc12BP <- which(is.na(breaks$finalFallBP) & !is.na(breaks$meanFallBPHUC12) )
 breaks$finalFallBP [ huc12BP ] <- breaks$meanFallBPHUC12[ huc12BP ]
 breaks$sourceFallBP[ huc12BP ] <- 'HUC12 mean'
-
+#------------
 
 # HUC8 averaged BPs
 # -----------------
@@ -425,6 +405,21 @@ breaks$sourceSpringBP[ huc4BP ] <- 'HUC4 mean'
 huc4BP <- which(is.na(breaks$finalFallBP) & !is.na(breaks$meanFallBPHUC4) )
 breaks$finalFallBP [ huc4BP ] <- breaks$meanFallBPHUC4[ huc4BP ]
 breaks$sourceFallBP[ huc4BP ] <- 'HUC4 mean'
+#-----------
+
+# Overall Averaged
+# Site averaged BPs
+# -----------------
+# Spring
+remainingBP <- which(is.na(breaks$finalSpringBP))
+breaks$finalSpringBP [ remainingBP ] <- trunc(meanBP$meanSpringBP)
+breaks$sourceSpringBP[ remainingBP ] <- 'overall mean'
+
+# Fall
+remainingBP <- which(is.na(breaks$finalFallBP))
+breaks$finalFallBP [ remainingBP ] <- trunc(meanBP$meanFallBP)
+breaks$sourceFallBP[ remainingBP ] <- 'overall mean'
+
 ```
 
 ```{r Save output}
