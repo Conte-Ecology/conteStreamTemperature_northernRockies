@@ -45,14 +45,31 @@ print(getwd())
 # rename all variables before setting the fixed and random, then select them by list?
 ####
 
+tempDataSyncS$landcover0 <- ifelse(tempDataSyncS$landcover == 0, 1, 0)
+tempDataSyncS$landcover1 <- ifelse(tempDataSyncS$landcover == 1, 1, 0)
+tempDataSyncS$landcover5 <- ifelse(tempDataSyncS$landcover == 5, 1, 0)
+tempDataSyncS$landcover6 <- ifelse(tempDataSyncS$landcover == 6, 1, 0)
+tempDataSyncS$landcover7 <- ifelse(tempDataSyncS$landcover == 7, 1, 0)
+tempDataSyncS$landcover8 <- ifelse(tempDataSyncS$landcover == 8, 1, 0)
+tempDataSyncS$landcover9 <- ifelse(tempDataSyncS$landcover == 9, 1, 0)
+tempDataSyncS$landcover10 <- ifelse(tempDataSyncS$landcover == 10, 1, 0)
+tempDataSyncS$landcover11 <- ifelse(tempDataSyncS$landcover == 11, 1, 0)
+
  fixed.ef <- c("intercept" 
                         , "Lat" 
-                        , "Long" 
+                        , "Long"
+               , "landcover1"
+               , "landcover5"
+               , "landcover6"
+               , "landcover7"
+               , "landcover8"
+               , "landcover9"
+               , "landcover10"
+               , "landcover11"
                , "flow_accum"
                         , "slope" 
                         , "Lake" 
                         , "glacier" 
-                        , "lake.glacier"
                , "airTemp.flow"
                         )
 
