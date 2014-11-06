@@ -32,7 +32,7 @@ graphsDir <- paste0(baseDir, '/graphs/')
 #source(paste0(baseDir, 'code/functions/temperatureModelingFunctions.R'))
 
 # load standardized and formatted data created with the 3-statModelPrep.Rmd script
-load(paste0(dataOutDir, 'tempDataSync-MA.RData'))
+load(paste0(dataOutDir, 'tempDataSync.RData'))
 ```
 
 ```{r eval = FALSE}
@@ -46,22 +46,21 @@ print(getwd())
 ####
 
  fixed.ef <- c("intercept" 
-                        , "Latitude" 
-                        , "Longitude" 
-                        , "TotDASqKM" 
-                        , "Forest" 
-                        , "ReachElevationM" 
-                        , "SurficialCoarseC" 
-                        , "CONUSWetland" 
-                        , "ImpoundmentsAllSqKM" 
-                        , "airTemp.TotDASqKM"
+                        , "Lat" 
+                        , "Long" 
+               , "flow_accum"
+                        , "slope" 
+                        , "Lake" 
+                        , "glacier" 
+                        , "lake.glacier"
+               , "airTemp.flow"
                         )
 
 site.ef <- c( "intercept.site" 
                       , "airTemp" 
-                      , "airTempLagged2" 
+                      #, "airTempLagged2" 
                       , "prcp" 
-                      , "prcpLagged1" 
+                      #, "prcpLagged1" 
                       , "airTemp.prcp"
                       )
 
@@ -77,7 +76,7 @@ cov.list <- list(fixed.ef = fixed.ef, site.ef = site.ef, year.ef = year.ef)
 #data.cal <- prepDF(tempDataSyncS, formulae = formulae)
 #str(data.cal)
 
-monitor.params <- c("residuals",
+monitor.params <- c(#"residuals",
             #"deviance",
             "sigma",
             "B.ar1",
@@ -100,7 +99,7 @@ monitor.params <- c("residuals",
 coda.tf <- T # currently only works in full for TRUE (using coda.samples)
 system.time(M.ar1 <- modelRegionalTempAR1(tempDataSyncS, cov.list, firstObsRows = firstObsRows, evalRows = evalRows, n.burn = 1000, n.it = 1000, n.thin = 1, nc = 3, coda = coda.tf, param.list = monitor.params)) # Slow with AR1: ~3-6 min per 100 iterations (13 min per 100 iter for site AR)
 
-save(M.ar1, file = paste0(dataLocalDir, "mcmc-MA.RData"))
+save(M.ar1, file = paste0(dataLocalDir, "mcmc.RData"))
 save(cov.list, file = paste0(dataLocalDir, "covariate-list.RData"))
 
 ```
