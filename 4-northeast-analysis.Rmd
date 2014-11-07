@@ -127,27 +127,27 @@ save(cov.list, file = paste0(dataLocalDir, "covariate-list.RData"))
 system.time(ggs.ar1 <- ggs(M.ar1)) # slow and memory intensive - 2 minutes with residuals saved in mcmc object and no other programs running but uses most of the memory on my 8 GB laptop
 gc() # clears all of the temporary variables stored by ggs and cuts hanging memory more than in half.
 
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-B0.pdf', family = "B.0", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
-ggs_traceplot(ggs.ar1, family = "B.0")
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-mu-huc.pdf', family = "mu.huc", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
-ggs_traceplot(ggs.ar1, family = "mu.huc")
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-mu-year.pdf', family = "mu.year", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
-ggs_traceplot(ggs.ar1, family = "mu.year")
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-mu-ar1.pdf', family = "mu.ar1", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
-ggs_traceplot(ggs.ar1, family = "mu.ar1")
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-sigma-ar1.pdf', family = "sigma.ar1", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
-ggs_traceplot(ggs.ar1, family = "sigma.ar1")
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-sigma-site.pdf', family = "sigma.b.site", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
-ggs_traceplot(ggs.ar1, family = "sigma.b.site")
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-sigma-huc.pdf', family = "sigma.b.huc", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
-ggs_traceplot(ggs.ar1, family = "sigma.b.huc")
-
-ggs_traceplot(ggs.ar1, family = "sigma.b.year")
+ggmcmc(ggs.ar1, file = 'localData/ggmcmc-sigma-year.pdf', family = "sigma.b.year", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
 ggmcmc(ggs.ar1, file = 'localData/ggmcmc-ar1-rho-huc.pdf', family = "rho.B.huc", plot = "ggs_traceplot")
 
 ggmcmc(ggs.ar1, file = 'localData/ggmcmc-ar1-B-ar1.pdf', family = "B.ar1", plot = c("ggs_traceplot", "ggs_compare_partial", "ggs_autocorrelation"))
 
+gc()
 ```
 
 ## Check model fit
