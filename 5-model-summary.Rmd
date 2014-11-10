@@ -129,8 +129,12 @@ cor.year
 
 
 fix.ef <- rbind(B.fixed, select(mu.huc, -index), select(mu.year, -index), mu.ar1)
+rand.ef <- rbind(select(sigma.b.site, -index), select(sigma.b.huc, -index), select(sigma.b.year, -index), mutate(sigma.ar1, coef = Parameter))
 
-coef.list <- list(fix.ef = fix.ef
+mod.summary = rbind(fix.ef, rand.ef)
+
+coef.list <- list(fix.ef = fix.ef, 
+                  rand.ef = rand.ef,
                   ,B.fixed = B.fixed
                   , mu.huc = mu.huc
                   , mu.year = mu.year
